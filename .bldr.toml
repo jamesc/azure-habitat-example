@@ -1,0 +1,4 @@
+[mysql]
+plan_path = "mysql"
+[wordpress]
+plan_path = "wordpress"

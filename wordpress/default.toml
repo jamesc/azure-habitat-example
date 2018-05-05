@@ -6,3 +6,18 @@ AUTH_SALT='+n-Z904uLwUf[fS(yJ`v2|LK+{H%-]rRo0i+vgj=ED^NDP4| +nq7c1V2LiqB[[j'
 SECURE_AUTH_SALT='W)#RiDm7m6Rj-cYTfPO&d?Pa>]&n8:rGzeL5]Zek|h4@)z:aV-.[[>6:y{2m}cw{'
 LOGGED_IN_SALT='#q-<*G+2|}dcwR.gqti+t}g[[KrfW`ez%?K._b+bd#y0g(w.9PWy>.Y=.@|=j|gP'
 NONCE_SALT='MZO22r,!91Pd=`K;IN-OO/5J^,KlInJQSYkl 5|J7^@-f1$xk:+]mwLUh%;DwS3D'
+
+[nginx]
+  worker_processes = 4
+
+  [nginx.events]
+    worker_connections = 1024
+
+  [nginx.http]
+    keepalive_timeout = 60
+    sendfile = "on"
+    tcp_nodelay = "on"
+    tcp_nopush = "on"
+
+    [nginx.http.listen]
+      port = 80

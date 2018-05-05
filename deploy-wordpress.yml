@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-user-toml
+type: Opaque
+data:
+  # Each item needs to be base64-encoded.
+  # Plain text content:
+  #   app_username="wordpress"
+  #   app_password="ThisIsSecret"
+  #   bind='0.0.0.0'
+  user.toml: YXBwX3VzZXJuYW1lPSJ3b3JkcHJlc3MiCmFwcF9wYXNzd29yZD0iVGhpc0lzU2VjcmV0IgpiaW5kPScwLjAuMC4wJwo=
+---
+apiVersion: habitat.sh/v1beta1
+kind: Habitat
+metadata:
+  name: wordpress-db
+customVersion: v1beta2
+spec:
+  v1beta2:
+    image: habitatregistry.azurecr.io/habitat/mysql:latest
+    count: 1
+    service:
+      name: mysql
+      topology: standalone
+      configSecretName: mysql-user-toml
+---
+apiVersion: habitat.sh/v1beta1
+kind: Habitat
+metadata:
+  name: wordpress-app
+customVersion: v1beta2
+spec:
+  v1beta2:
+    image: habitatregistry.azurecr.io/habitat/wordpress:latest
+    count: 1
+    service:
+      name: wordpress
+      topology: standalone
+      bind:
+        - name: database
+          service: mysql
+          group: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-lb
+spec:
+  type: LoadBalancer
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+  selector:
+    habitat-name: wordpress-app
+

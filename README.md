@@ -4,7 +4,7 @@ Example application for blog post on deploying to AKS &amp; ACR with Habitat
 See http://habitat.sh/blog/2018/05/aks-and-acr-walkthrough for the full details of the walkthrough.
 
 ## Contents
-  * [scripts/setup-acr-aks.sh](scripts/setup-acr-aks.sh) - quickstart script to create a AKS cluster and ACR registry, ready to push packages to.
+  * [scripts/setup-aks-acr.sh](scripts/setup-aks-acr.sh) - quickstart script to create a AKS cluster and ACR registry, ready to push packages to.
   * [wordpress](wordpress) - example wordpress packaged by Habitat
   * [mysql](mysql) - example mysql packaged by Habitat
   * [habitat-operator.yml](habitat-operator.yml) - Kubernetes Deployment description for the [Habitat Operator](https://github.com/habitat-sh/habitat-operator)

@@ -18,7 +18,7 @@ metadata:
 customVersion: v1beta2
 spec:
   v1beta2:
-    image: habitatregistry.azurecr.io/habitat/mysql:latest
+    image: habitatregistry.azurecr.io/azure-habitat-example/mysql:latest
     count: 1
     service:
       name: mysql
@@ -32,7 +32,7 @@ metadata:
 customVersion: v1beta2
 spec:
   v1beta2:
-    image: habitatregistry.azurecr.io/habitat/wordpress:latest
+    image: habitatregistry.azurecr.io/azure-habitat-example/wordpress:latest
     count: 1
     service:
       name: wordpress

@@ -22,10 +22,12 @@ if [ ! -z ${UNIQUE_NAME} ]; then
     BLDR_PRINCIPAL_NAME="${BLDR_PRINCIPAL_NAME}-${UNIQUE_ID}"
 fi
 #
-# Setup AKS
+# Setup Latest version of AKS
 #
+
+LATEST_VERSION=$(az aks get-versions --location eastus --query "orchestrators[].orchestratorVersion" -o tsv| sort|sort -V|tail -1)
 az group create --name $RESOURCE_GROUP --location eastus
-az aks create --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --node-count $AKS_NODE_COUNT --generate-ssh-keys
+az aks create --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --node-count $AKS_NODE_COUNT --generate-ssh-keys --kubernetes-version $LATEST_VERSION
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME
 
 #

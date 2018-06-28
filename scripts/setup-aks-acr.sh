@@ -14,6 +14,13 @@ BLDR_PRINCIPAL_NAME="habitat-acr-registry"
 AKS_NODE_COUNT=1
 ACR_SKU="Basic"
 
+if [ ! -z ${UNIQUE_NAME} ]; then
+    UNIQUE_ID=$(head /dev/urandom | tr -dc a-z0-9 | head -c 6 ; echo '')
+    RESOURCE_GROUP="${RESOURCE_GROUP}-${UNIQUE_ID}"
+    AKS_CLUSTER_NAME="aks-demo"
+    ACR_NAME="${ACR_NAME}${UNIQUE_ID}"
+    BLDR_PRINCIPAL_NAME="${BLDR_PRINCIPAL_NAME}-${UNIQUE_ID}"
+fi
 #
 # Setup AKS
 #
@@ -34,6 +41,10 @@ ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query "
 az role assignment create --assignee $CLIENT_ID --role Reader --scope $ACR_ID
 
 # Create Service Principal for Habitat Builder
+OLD_ID=$(az ad sp list --spn http://${BLDR_PRINCIPAL_NAME} --query "[].appId" -o tsv)
+if [ ! -z ${OLD_ID} ]; then
+    az ad sp delete --id ${OLD_ID}
+fi
 az ad sp create-for-rbac --scopes $ACR_ID --role Owner --password "$BLDR_PRINCIPAL_PASSWORD" --name $BLDR_PRINCIPAL_NAME
 BLDR_ID=$(az ad sp list --display-name $BLDR_PRINCIPAL_NAME  --query "[].appId" --output tsv)
 

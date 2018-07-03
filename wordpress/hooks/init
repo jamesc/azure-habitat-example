@@ -1,9 +1,15 @@
 #!/bin/bash
 exec 2>&1
 
+{{~#if bind.database.host ~}}
+HOSTNAME={{bind.database.host}}
+{{else ~}}
+HOSTNAME={{bind.database.first.sys.ip}}
+{{~/if ~}}
+
 # check if database exists
 mysql_ready() {
-    mysqladmin ping -h {{bind.database.first.sys.ip}} -u {{bind.database.first.cfg.username}} -p{{bind.database.first.cfg.password}} > /dev/null 2>&1
+    mysqladmin ping -h $HOSTNAME -u {{bind.database.first.cfg.username}} -p{{bind.database.first.cfg.password}} > /dev/null 2>&1
 }
 
 if !(mysql_ready) then
@@ -12,7 +18,7 @@ if !(mysql_ready) then
 fi
 
 # create database
-mysql -h {{bind.database.first.sys.ip}} -u {{bind.database.first.cfg.username}} -p{{bind.database.first.cfg.password}} -e "create database IF NOT EXISTS {{bind.database.first.cfg.username}}"
+mysql -h $HOSTNAME -u {{bind.database.first.cfg.username}} -p{{bind.database.first.cfg.password}} -e "create database IF NOT EXISTS {{bind.database.first.cfg.database}}"
 
 cp -r {{pkg.path}}/wordpress/* {{pkg.svc_data_path}}
 cp -n {{pkg.svc_config_path}}/wp-config.php {{pkg.svc_data_path}}

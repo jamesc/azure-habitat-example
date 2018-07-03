@@ -8,8 +8,9 @@ data:
   # Plain text content:
   #   app_username="wordpress"
   #   app_password="ThisIsSecret"
+  #   app_database="wordpress"
   #   bind='0.0.0.0'
-  user.toml: YXBwX3VzZXJuYW1lPSJ3b3JkcHJlc3MiCmFwcF9wYXNzd29yZD0iVGhpc0lzU2VjcmV0IgpiaW5kPScwLjAuMC4wJwo=
+  user.toml: YXBwX3VzZXJuYW1lPSJ3b3JkcHJlc3MiCmFwcF9wYXNzd29yZD0iVGhpc0lzU2VjcmV0IgphcHBfZGF0YWJhc2U9IndvcmRwcmVzcyIKYmluZD0nMC4wLjAuMCcK
 ---
 apiVersion: habitat.sh/v1beta1
 kind: Habitat

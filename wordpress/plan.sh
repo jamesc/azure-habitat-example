@@ -22,7 +22,7 @@ pkg_exports=()
 pkg_exposes=()
 
 pkg_binds=(
-  [database]="port username password"
+  [database]="host port username password database"
 )
 
 

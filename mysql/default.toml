@@ -1,7 +1,9 @@
 port = 3306
+host = false
 bind = "127.0.0.1"
 language = "english"
 root_password = ""
 app_username = false
 app_password = false
+app_database="wordpress"
 password_column_name = "authentication_string"

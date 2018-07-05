@@ -1,0 +1,44 @@
+#!/bin/sh
+
+set -x 
+exec 2>&1
+
+INCAN=$(date +%s)
+
+SECRET_FILENAME=$(mktemp)
+
+kubectl get secret {{cfg.secret_name}} -o json > ${SECRET_FILENAME}
+if [ $? -ne 0 ]; then
+  echo "Couldn't get secret {{cfg.secret_name}}"
+  exit 1
+fi
+
+HOST=$(cat ${SECRETS_FILENAME} |jq -r .data.host|base64 --decode)
+PORT=$(cat ${SECRETS_FILENAME} |jq -r .data.port|base64 --decode)
+USERNAME=$(cat ${SECRETS_FILENAME} |jq -r .data.username|base64 --decode)
+PASSWORD=$(cat ${SECRETS_FILENAME} |jq -r .data.password|base64 --decode)
+DATABASE=$(cat ${SECRETS_FILENAME} |jq -r .data.database|base64 --decode)
+URI=$(cat ${SECRETS_FILENAME} |jq -r .data.uri|base64 --decode)
+
+
+FILENAME=$(mktemp)
+cat << EOF > ${FILENAME}
+[mysql]
+host=${HOST}
+port=${PORT}
+username=${USERNAME}
+password=${PASSWORD}
+database=${DATABASE}
+uri=${URI}
+EOF
+
+cat ${FILENAME}
+
+hab config apply {{cfg.hab.pkg}}.{{cfg.hab.group}} ${INCAN} /tmp/${FILENAME}
+
+echo "OSBA Proxy starting"
+
+while true; do 
+  sleep {{cfg.sleep}}
+  echo "Running..."
+done

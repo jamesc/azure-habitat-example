@@ -46,9 +46,11 @@ pkg_include_dirs=(include)
 pkg_lib_dirs=(lib)
 
 pkg_exports=(
+  [host]=host
   [port]=port
-  [password]=app_password
   [username]=app_username
+  [password]=app_password
+  [database]=app_database
 )
 
 do_build() {

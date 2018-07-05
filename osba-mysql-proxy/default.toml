@@ -1,0 +1,10 @@
+sleep=3600
+secret_name="osba-mysql-secret"
+
+[mysql]
+host=false
+port=false
+username=false
+password=false
+database=false
+uri=false

@@ -1,5 +1,5 @@
 pkg_name=osba-mysql-proxy
-pkg_origin=jamesc
+pkg_origin=azure-habitat-example
 pkg_version="0.1.0"
 pkg_maintainer="The Habitat Maintainers <humans@habitat.sh>"
 pkg_license=("Apache-2.0")

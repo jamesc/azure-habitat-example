@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x 
+set -x
 exec 2>&1
 
 INCAN=$(date +%s)
@@ -13,32 +13,32 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-HOST=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.host|base64 --decode)
-PORT=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.port|base64 --decode)
-USERNAME=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.username|base64 --decode)
-PASSWORD=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.password|base64 --decode)
-DATABASE=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.database|base64 --decode)
-URI=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.uri|base64 --decode)
+HOST=$(cat ${SECRET_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.host|base64 -d)
+PORT=$(cat ${SECRET_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.port|base64 -d)
+USERNAME=$(cat ${SECRET_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.username|base64 -d)
+PASSWORD=$(cat ${SECRET_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.password|base64 -d)
+DATABASE=$(cat ${SECRET_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.database|base64 -d)
+URI=$(cat ${SECRET_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.uri|base64 -d)
 
 
 FILENAME=$(mktemp)
 cat << EOF > ${FILENAME}
 [mysql]
-host=${HOST}
-port=${PORT}
-username=${USERNAME}
-password=${PASSWORD}
-database=${DATABASE}
-uri=${URI}
+host="${HOST}"
+port="${PORT}"
+username="${USERNAME}"
+password="${PASSWORD}"
+database="${DATABASE}"
+uri="${URI}"
 EOF
 
 cat ${FILENAME}
 
-hab config apply {{cfg.hab.pkg}}.{{cfg.hab.group}} ${INCAN} /tmp/${FILENAME}
+hab config apply {{svc.pkg}}.{{svc.group}} ${INCAN} ${FILENAME}
 
 echo "OSBA Proxy starting"
 
-while true; do 
+while true; do
   sleep {{cfg.sleep}}
   echo "Running..."
 done

@@ -7,18 +7,18 @@ INCAN=$(date +%s)
 
 SECRET_FILENAME=$(mktemp)
 
-kubectl get secret {{cfg.secret_name}} -o json > ${SECRET_FILENAME}
+$(hab pkg path core/kubectl)/bin/kubectl get secret {{cfg.secret_name}} -o json > ${SECRET_FILENAME}
 if [ $? -ne 0 ]; then
   echo "Couldn't get secret {{cfg.secret_name}}"
   exit 1
 fi
 
-HOST=$(cat ${SECRETS_FILENAME} |jq -r .data.host|base64 --decode)
-PORT=$(cat ${SECRETS_FILENAME} |jq -r .data.port|base64 --decode)
-USERNAME=$(cat ${SECRETS_FILENAME} |jq -r .data.username|base64 --decode)
-PASSWORD=$(cat ${SECRETS_FILENAME} |jq -r .data.password|base64 --decode)
-DATABASE=$(cat ${SECRETS_FILENAME} |jq -r .data.database|base64 --decode)
-URI=$(cat ${SECRETS_FILENAME} |jq -r .data.uri|base64 --decode)
+HOST=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.host|base64 --decode)
+PORT=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.port|base64 --decode)
+USERNAME=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.username|base64 --decode)
+PASSWORD=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.password|base64 --decode)
+DATABASE=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.database|base64 --decode)
+URI=$(cat ${SECRETS_FILENAME} |$(hab pkg path core/jq-static)/bin/jq -r .data.uri|base64 --decode)
 
 
 FILENAME=$(mktemp)

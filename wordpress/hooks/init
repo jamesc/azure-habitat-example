@@ -1,11 +1,13 @@
 #!/bin/bash
 exec 2>&1
 
-{{#if bind.database.host ~}}
+set -x
+
+{{#if bind.database.host }}
 HOSTNAME="{{bind.database.host}}"
-{{else ~}}
+{{else }}
 HOSTNAME="{{bind.database.first.sys.ip}}"
-{{~/if }}
+{{/if }}
 
 # check if database exists
 mysql_ready() {

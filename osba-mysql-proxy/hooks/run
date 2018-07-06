@@ -11,7 +11,12 @@ SECRET_FILENAME=$(mktemp)
 
 export KUBERNETES_SERVICE_HOST
 export KUBERNETES_SERVICE_PORT
-$(hab pkg path core/kubectl)/bin/kubectl get secret {{cfg.secret_name}} -o json > ${SECRET_FILENAME}
+
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl -ks -H "Authorization: Bearer ${TOKEN}" \
+  https:${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/default/secrets/{{cfg.secret_name}} \
+  > ${SECRET_FILENAME}
+
 if [ $? -ne 0 ]; then
   echo "Couldn't get secret {{cfg.secret_name}}"
   exit 1
@@ -38,7 +43,7 @@ EOF
 
 cat ${FILENAME}
 
-hab config apply {{svc.pkg}}.{{svc.group}} ${INCAN} ${FILENAME}
+hab config apply {{svc.service}}.{{svc.group}} ${INCAN} ${FILENAME}
 
 echo "OSBA Proxy starting"
 

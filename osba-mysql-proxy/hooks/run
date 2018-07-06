@@ -3,10 +3,14 @@
 set -x
 exec 2>&1
 
+env
+
 INCAN=$(date +%s)
 
 SECRET_FILENAME=$(mktemp)
 
+export KUBERNETES_SERVICE_HOST
+export KUBERNETES_SERVICE_PORT
 $(hab pkg path core/kubectl)/bin/kubectl get secret {{cfg.secret_name}} -o json > ${SECRET_FILENAME}
 if [ $? -ne 0 ]; then
   echo "Couldn't get secret {{cfg.secret_name}}"

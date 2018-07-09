@@ -14,7 +14,7 @@ export KUBERNETES_SERVICE_PORT
 
 TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 curl -ks -H "Authorization: Bearer ${TOKEN}" \
-  https:${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/default/secrets/{{cfg.secret_name}} \
+  https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/default/secrets/{{cfg.secret_name}} \
   > ${SECRET_FILENAME}
 
 if [ $? -ne 0 ]; then

@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-proxy-toml
+type: Opaque
+data:
+  # Each item needs to be base64-encoded.
+  # Plain text content:
+  #   secret_name="osba-secret"
+  user.toml: c2VjcmV0X25hbWU9Im9zYmEtc2VjcmV0Igo=
+---
+apiVersion: habitat.sh/v1beta1
+kind: Habitat
+metadata:
+  name: wordpress-db-proxy
+customVersion: v1beta2
+spec:
+  v1beta2:
+    image: habitatregistry.azurecr.io/azure-habitat-example/osba-mysql-proxy:latest
+    count: 1
+    service:
+      name: osba-mysql-proxy
+      topology: standalone
+      configSecretName: mysql-proxy-toml
+---
+apiVersion: habitat.sh/v1beta1
+kind: Habitat
+metadata:
+  name: wordpress-osba-app
+customVersion: v1beta2
+spec:
+  v1beta2:
+    image: habitatregistry.azurecr.io/azure-habitat-example/wordpress:latest
+    count: 1
+    service:
+      name: wordpress
+      topology: standalone
+      bind:
+        - name: database
+          service: osba-mysql-proxy
+          group: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-osba-lb
+spec:
+  type: LoadBalancer
+  ports:
+  - name: web
+    port: 80
+    targetPort: 80
+  selector:
+    habitat-name: wordpress-osba-app
+

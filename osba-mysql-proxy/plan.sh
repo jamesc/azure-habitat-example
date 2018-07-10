@@ -1,9 +1,12 @@
 pkg_name=osba-mysql-proxy
 pkg_origin=azure-habitat-example
-pkg_version="0.1.1"
+pkg_version="0.1.2"
 pkg_maintainer="The Habitat Maintainers <humans@habitat.sh>"
 pkg_license=("Apache-2.0")
 pkg_description="A Proxy Service for MySQL service created via Open Service Broker for Azure (OSBA)"
+
+pkg_svc_user="root"
+pkg_svc_group="${pkg_svc_user}"
 
 pkg_deps=(
     core/busybox-static

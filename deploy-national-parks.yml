@@ -18,7 +18,7 @@ metadata:
 customVersion: v1beta2
 spec:
   v1beta2:
-    image: habitatregistry.azurecr.io/jamesc/national-parks:7.5.2
+    image: habitatregistry.azurecr.io/jamesc/national-parks:latest
     count: 2
     service:
       name: national-parks

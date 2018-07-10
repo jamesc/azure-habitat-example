@@ -3,10 +3,10 @@ exec 2>&1
 
 set -x
 
-{{#if bind.database.host }}
-HOSTNAME="{{bind.database.host}}"
+{{#if bind.database.first.cfg.host }}
+HOSTNAME="{{bind.database.first.cfg.host}}" # database.host
 {{else }}
-HOSTNAME="{{bind.database.first.sys.ip}}"
+HOSTNAME="{{bind.database.first.sys.ip}}" # sys.ip
 {{/if }}
 
 # check if database exists

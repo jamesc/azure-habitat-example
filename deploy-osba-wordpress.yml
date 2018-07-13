@@ -1,3 +1,27 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: secret-reader
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default
+  #name: aks-demo-habitat-operator # Name is case sensitive
+roleRef:
+  kind: ClusterRole #this must be Role or ClusterRole
+  name: secret-reader # this must match the name of the Role or ClusterRole you wish to bind to
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -13,6 +37,9 @@ apiVersion: habitat.sh/v1beta1
 kind: Habitat
 metadata:
   name: wordpress-db-proxy
+  labels:
+    source: habitat-demo
+    app: wordpress-osba-habitat
 customVersion: v1beta2
 spec:
   v1beta2:
@@ -27,6 +54,9 @@ apiVersion: habitat.sh/v1beta1
 kind: Habitat
 metadata:
   name: wordpress-osba-app
+  labels:
+    source: habitat-demo
+    app: wordpress-osba-habitat
 customVersion: v1beta2
 spec:
   v1beta2:

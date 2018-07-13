@@ -5,13 +5,14 @@
 RESOURCE_GROUP="habitat-aks-demo"
 AKS_CLUSTER_NAME="aks-demo"
 ACR_NAME="habitatregistry"
+LOCATION="eastus"
 
 BLDR_PRINCIPAL_PASSWORD="ThisIsVeryStrongPassword"
 #
 # No Need to change these
 #
 BLDR_PRINCIPAL_NAME="habitat-acr-registry"
-AKS_NODE_COUNT=1
+AKS_NODE_COUNT=3
 ACR_SKU="Basic"
 
 if [ ! -z ${UNIQUE_NAME} ]; then
@@ -24,8 +25,8 @@ fi
 #
 # Setup AKS
 #
-az group create --name $RESOURCE_GROUP --location eastus
-az aks create --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --node-count $AKS_NODE_COUNT --generate-ssh-keys
+az group create --name $RESOURCE_GROUP --location ${LOCATION} --tags "owner=${USER}"
+az aks create --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --node-count $AKS_NODE_COUNT --generate-ssh-keys --tags "owner=${USER}"
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME
 
 #

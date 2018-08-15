@@ -16,6 +16,16 @@ if [ ! -z ${OLD_ID} ]; then
     fi
 fi
 
+OLD_ID=$(az ad app list --display-name ${PRINCIPAL_NAME} --query "[].appId" -o tsv)
+if [ ! -z ${OLD_ID} ]; then
+    az ad app delete --id ${OLD_ID}
+
+    # And delete osba if it's installed
+    helm ls osba|grep ^osba
+    if [ $? -eq 0 ]; then
+      helm delete --purge osba
+    fi
+fi
 
 AZURE_SUBSCRIPTION_ID=$(az account show --query "id" -o tsv)
 AZURE_CLIENT_SECRET=$(az ad sp create-for-rbac --name ${PRINCIPAL_NAME} --query "password" -o tsv)

@@ -3,6 +3,8 @@
 
 set -x
 
+VERSION="0.1.27"
+
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-admin \
   --clusterrole=cluster-admin \
@@ -16,7 +18,8 @@ helm repo update
 helm install svc-cat/catalog \
    --name catalog --namespace catalog \
    --wait \
-   --set apiserver.storage.etcd.persistence.enabled=true
+   --set apiserver.storage.etcd.persistence.enabled=true \
+   --version ${VERSION}
 
 svcat get plans
 

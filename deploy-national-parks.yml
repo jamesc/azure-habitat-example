@@ -1,7 +1,7 @@
 apiVersion: habitat.sh/v1beta1
 kind: Habitat
 metadata:
-  name: np-mongodb
+  name: national-parks-mongodb
 customVersion: v1beta2
 spec:
   v1beta2:

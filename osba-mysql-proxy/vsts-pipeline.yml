@@ -1,0 +1,84 @@
+resources:
+- repo: self
+
+steps:
+- task: chef-software.vsts-habitat-tasks.vsts-habitat-tasks-install.vsts-habitat-install@1
+  displayName: Install Habitat
+
+- task: chef-software.vsts-habitat-tasks.vsts-habitat-tasks-signing-key.vsts-habitat-signing-key@1
+  displayName: Signing Origin Key
+  inputs:
+    habitatOrigin: 'azure-habitat-example'
+
+- task: chef-software.vsts-habitat-tasks.vsts-habitat-tasks-build.vsts-habitat-build@1
+  displayName: Build Habitat plan
+  inputs:
+    habitatPlanContext: osba-mysql-proxy
+
+- bash: |
+   source ./results/last_build.env
+   echo "##vso[task.setvariable variable=pkg_origin;isOutput=true;]${pkg_origin}"
+   echo "##vso[task.setvariable variable=pkg_name;isOutput=true;]${pkg_name}"
+   echo "##vso[task.setvariable variable=pkg_version;isOutput=true;]${pkg_version}"
+   echo "##vso[task.setvariable variable=pkg_release;isOutput=true;]${pkg_release}"
+   echo "##vso[task.setvariable variable=pkg_artifact;isOutput=true;]${pkg_artifact}"
+  displayName: Set Habitat Variables
+  name: hab
+
+- bash: |
+   source results/last_build.env
+   newbuildnumber="${pkg_version}-${pkg_release}"
+   echo "##vso[build.updatebuildnumber]$newbuildnumber"
+  displayName: Set BuildNumber
+
+- task: chef-software.vsts-habitat-tasks.vsts-habitat-tasks-pkg-upload.vsts-habitat-pkg-upload@1
+  displayName: Package Upload
+  inputs:
+    habitatOrigin: 'azure-habitat-example'
+    habitatPackagePath: '$(System.DefaultWorkingDirectory)/results/*-$(Build.BuildNumber)-*.hart last_build.env'
+
+- task: chef-software.vsts-habitat-tasks.vsts-habitat-tasks-pkg-export.vsts-habitat-pkg-export@1
+  displayName: Package Export
+  inputs:
+    habitatOrigin: 'azure-habitat-example'
+    habitatExportName: $(hab.pkg_name)
+    habitatExportVersion: $(hab.pkg_version)
+
+- bash: |
+   echo "$(hab.pkg_origin)/$(hab.pkg_name)" > image.names
+  displayName: Write Image Name
+
+- task: Docker@0
+  displayName: Tag images
+  inputs:
+    azureSubscription: 'Partner Engineering'
+    azureContainerRegistry: '{"loginServer":"habitatregistry.azurecr.io"}'
+    action: 'Tag images'
+    imageNamesPath: image.names
+    additionalImageTags: |
+     $(hab.pkg_version)-$(hab.pkg_release)
+     $(hab.pkg_version)
+
+- task: Docker@0
+  displayName: Push images
+  inputs:
+    azureSubscription: 'Partner Engineering'
+    azureContainerRegistry: '{"loginServer":"habitatregistry.azurecr.io"}'
+    action: 'Push images'
+    imageNamesPath: image.names
+    additionalImageTags: |
+     $(hab.pkg_version)-$(hab.pkg_release)
+     $(hab.pkg_version)
+    includeLatestTag: true
+
+- task: CopyFiles@2
+  displayName: Copy .hart artifact
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/results'
+    Contents: |
+     *-$(Build.BuildNumber)-*.hart
+     last_build.env
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish artifacts

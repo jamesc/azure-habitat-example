@@ -12,7 +12,9 @@ BLDR_PRINCIPAL_PASSWORD="ThisIsVeryStrongPassword"
 # No Need to change these
 #
 BLDR_PRINCIPAL_NAME="habitat-acr-registry"
+AKS_VERSION="1.11.2"
 AKS_NODE_COUNT=3
+AKS_NODE_SIZE="Standard_DS1_v2"
 ACR_SKU="Basic"
 
 if [ ! -z ${UNIQUE_NAME} ]; then
@@ -22,23 +24,37 @@ if [ ! -z ${UNIQUE_NAME} ]; then
     ACR_NAME="${ACR_NAME}${UNIQUE_ID}"
     BLDR_PRINCIPAL_NAME="${BLDR_PRINCIPAL_NAME}-${UNIQUE_ID}"
 fi
+
 #
 # Setup AKS
 #
 az group create --name $RESOURCE_GROUP --location ${LOCATION} --tags "owner=${USER}"
-az aks create --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --node-count $AKS_NODE_COUNT --generate-ssh-keys --tags "owner=${USER}"
+az aks create \
+    --resource-group $RESOURCE_GROUP \
+    --name $AKS_CLUSTER_NAME \
+    --node-count $AKS_NODE_COUNT \
+    --node-vm-size ${AKS_NODE_SIZE} \
+    --no-ssh-key \
+    --kubernetes-version ${AKS_VERSION} \
+    --tags "owner=${USER}"
+
+kubectl config delete-cluster ${AKS_CLUSTER_NAME}
+kubectl config delete-context ${AKS_CLUSTER_NAME}
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME
 
 #
-# Setup ACR
+# Create ACR if it doesn't exist
 #
-az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku $ACR_SKU
+ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query id --output tsv)
+if [ $? -ne 0 ]; then
+    az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku $ACR_SKU
+    ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query "id" --output tsv)
+fi
 
 #
 # Grant Reader access to ACR from AKS
 #
 CLIENT_ID=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query "servicePrincipalProfile.clientId" --output tsv)
-ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query "id" --output tsv)
 az role assignment create --assignee $CLIENT_ID --role Reader --scope $ACR_ID
 
 # Create Service Principal for Habitat Builder

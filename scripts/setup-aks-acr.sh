@@ -17,7 +17,7 @@ BLDR_PRINCIPAL_PASSWORD="ThisIsVeryStrongPassword"
 BLDR_PRINCIPAL_NAME="habitat-acr-registry"
 AKS_VERSION="1.11.2"
 AKS_NODE_COUNT=3
-AKS_NODE_SIZE="Standard_DS1_v2"
+AKS_NODE_SIZE="Standard_B4ms"
 ACR_SKU="Basic"
 
 if [ ! -z ${UNIQUE_NAME} ]; then
@@ -50,6 +50,7 @@ az aks create \
     ${WORKSPACE_OPTION} \
     --tags "owner=${USER}"
 
+kubectl config unset users.clusterUser_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}
 kubectl config delete-cluster ${AKS_CLUSTER_NAME}
 kubectl config delete-context ${AKS_CLUSTER_NAME}
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME

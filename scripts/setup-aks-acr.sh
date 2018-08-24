@@ -62,8 +62,21 @@ if [ $? -ne 0 ]; then
     echo "Creating Azure Container Registry ${ACR_NAME}"
     az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku $ACR_SKU
     ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query "id" --output tsv)
+
+    # Create Service Principal for Habitat Builder to push to ACR
+    OLD_ID=$(az ad sp list --spn http://${BLDR_PRINCIPAL_NAME} --query "[].appId" -o tsv)
+    if [ ! -z ${OLD_ID} ]; then
+        az ad sp delete --id ${OLD_ID}
+    fi
+    az ad sp create-for-rbac --scopes $ACR_ID --role Owner --password "$BLDR_PRINCIPAL_PASSWORD" --name $BLDR_PRINCIPAL_NAME
+    BLDR_ID=$(az ad sp list --display-name $BLDR_PRINCIPAL_NAME  --query "[].appId" --output tsv)
+
+    echo "Configuration Details for Habitat Builder:"
+    echo "  Server URL : ${ACR_NAME}.azurecr.io"
+    echo "  Service Principal ID : $BLDR_ID"
+    echo "  Service Principal Password : $BLDR_PRINCIPAL_PASSWORD"
 else
-    echo "Using existing Azure Container Registry ${ACR_NAME}
+    echo "Using existing Azure Container Registry ${ACR_NAME}"
 fi
 
 #
@@ -71,16 +84,3 @@ fi
 #
 CLIENT_ID=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query "servicePrincipalProfile.clientId" --output tsv)
 az role assignment create --assignee $CLIENT_ID --role Reader --scope $ACR_ID
-
-# Create Service Principal for Habitat Builder
-OLD_ID=$(az ad sp list --spn http://${BLDR_PRINCIPAL_NAME} --query "[].appId" -o tsv)
-if [ ! -z ${OLD_ID} ]; then
-    az ad sp delete --id ${OLD_ID}
-fi
-az ad sp create-for-rbac --scopes $ACR_ID --role Owner --password "$BLDR_PRINCIPAL_PASSWORD" --name $BLDR_PRINCIPAL_NAME
-BLDR_ID=$(az ad sp list --display-name $BLDR_PRINCIPAL_NAME  --query "[].appId" --output tsv)
-
-echo "Configuration Details for Habitat Builder:"
-echo "  Server URL : ${ACR_NAME}.azurecr.io"
-echo "  Service Principal ID : $BLDR_ID"
-echo "  Service Principal Password : $BLDR_PRINCIPAL_PASSWORD"

@@ -7,6 +7,9 @@ AKS_CLUSTER_NAME="aks-demo"
 ACR_NAME="habitatregistry"
 LOCATION="eastus"
 
+LOG_ANALYTICS_RESOURCE_GROUP="habitat-aks-demo-workspace"
+LOG_ANALYTICS_RESOURCE_NAME="habitat-aks-demo"
+
 BLDR_PRINCIPAL_PASSWORD="ThisIsVeryStrongPassword"
 #
 # No Need to change these
@@ -25,6 +28,14 @@ if [ ! -z ${UNIQUE_NAME} ]; then
     BLDR_PRINCIPAL_NAME="${BLDR_PRINCIPAL_NAME}-${UNIQUE_ID}"
 fi
 
+# Check for existing Log Analytics workspace
+LA_ID=$(az resource show --resource-group ${LOG_ANALYTICS_RESOURCE_GROUP} --name ${LOG_ANALYTICS_RESOURCE_NAME} --namespace 'Microsoft.OperationalInsights' --resource-type workspaces --query id --output tsv)
+WORKSPACE_OPTION=""
+if [ $? -eq 0 ]; then
+  echo "Found Log Analytics workspace ${LOG_ANALYTICS_RESOURCE_NAME}.  Enabling monitoring..."
+  WORKSPACE_OPTION="--enable-addons monitoring --workspace-resource-id ${LA_ID}"
+fi
+
 #
 # Setup AKS
 #
@@ -36,6 +47,7 @@ az aks create \
     --node-vm-size ${AKS_NODE_SIZE} \
     --no-ssh-key \
     --kubernetes-version ${AKS_VERSION} \
+    ${WORKSPACE_OPTION} \
     --tags "owner=${USER}"
 
 kubectl config delete-cluster ${AKS_CLUSTER_NAME}
@@ -47,8 +59,11 @@ az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME
 #
 ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query id --output tsv)
 if [ $? -ne 0 ]; then
+    echo "Creating Azure Container Registry ${ACR_NAME}"
     az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku $ACR_SKU
     ACR_ID=$(az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --query "id" --output tsv)
+else
+    echo "Using existing Azure Container Registry ${ACR_NAME}
 fi
 
 #

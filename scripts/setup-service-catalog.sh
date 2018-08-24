@@ -15,8 +15,7 @@ helm repo update
 
 helm install svc-cat/catalog \
    --name catalog --namespace catalog \
-   --wait \
-   --set apiserver.storage.etcd.persistence.enabled=true
+   --wait
 
 svcat get plans
 
